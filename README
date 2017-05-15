@@ -1,0 +1,60 @@
+PolicySubmission;Sarsa_Conv_Net; We trained a learner that aims to maximize the game-given rewards while being aware of its control policy
+====
+Names: Dan Kufra, Eran Malach
+==== (max 1000 chars)
+We represented the world as an KxK matrix around the head of the snake, simply fed as integers (which represent each symbol) to the classifier.
+Our labels for the net was the value of
+Additional things we tried:
+Different patch sizes: We tried various sizes and ended up choosing on an 11X11 patch with the snake's head in the center.
+A channel representing the length of the snake(fed as a second channel of constants to our convolutional net).
+Not using a net and just using Q-learning in tabular form.
+None of these worked as good as what we submitted.
+==== (max 600 chars)
+We're using SARSA- a variant of Deep-Q-Learning which takes into account the current state, next state, 
+current action, next action (and the reward of the current action). The model is implemented by a 
+convolutional network that is fed with the KxK patches representing the world around the snakes head position and direction.
+Instead of having our Q function update step assume that the next state will use the maximal predicted Q-value we let it be aware 
+of the actual action taken. This allows it to be a bit more cautious to start.
+==== (max 500 chars)
+We chose to implement an epsilon greedy learner with a decay factor. At the start of our run we define the start epsilon, end epsilon and
+for how many iterations we wish to decay it. We calculate our decay factor based on this and lower our chance of random moves accordingly.
+As we play and interact with the environment we also save a dictionary of values on the board and the reward we got from interacting with
+them. We then with some (low) probability make our learner go towards certain values.
+==== (max 600 chars)
+Depending on the board and the iteration we got good or mediocre results (by an arbitrary standard we set). We tested our learner by first
+settling on the described model and then fine-tuning hyper-parameters until we found those with the best results. We ran our learner in 
+various boards with multiple players and also alone. We found that against the Avoid_Collisions learner that was provided we usually get
+second place in a match against 4 other snakes. Their survival ability makes for a significant score boost which becaues
+we sometimes take risks (or do a random move) we can miss out on.
+==== (max 10000 chars)
+First of all this was an excellent exercise. We learned a lot and it gave us motivation to implement more projects using reinforcement learning.
+
+We have a few other things of note that we implemented in our learner:
+1. We created a memory of previous turns in order to learn in batches of random states and actions we did.
+2. We added a penalty for the case where the snake chases its own tail. This is a confusing situation because the reward the game gives for going
+to the location of your tail is not the kill reward. But the tail is the same representation as the rest of the body of the snake.
+3. We added an indication in our Q function for if we died (end of an episode). This is so that we won't associate dying with going to a 'better' state.
+
+Our work process was:
+1. Implemented tabular Q learning without a neural network.
+2. Switched to a neural network with 2 small hidden layers.
+3. Switched to a neural network with batches.
+4. Switched to SARSA instead of Q learning.
+5. Switched to a Convolutional Neural Network using SARSA
+
+Throughout this whole process we played with multiple variants of exploration before settling on a simple decaying epsilon greedy explorer. With the 
+added check of with small probability making a move towards items we know are rewarding (by mapping value on the board to reward in real time). 
+This is in order to encourage our learner to make this move on its own. Since without trying these states it won't know the reward is good.
+
+Some interesting things we attempted:
+Combining the Avoid_Collisions heuristic with our learner: By mapping rewards we get from the enviroment to integer values on the board we were able
+to get a good approximation of what the obstacles and bad foods were. This allowed us to emulate the Avoid_Collisions strategy and build on top of it
+with hunting for food. But, this seemed a bit too heuristic and against the spirit of a reinforcement learning hackathon, so we set our default
+arguments to ignore it.
+
+Things we would have liked to attempt given more time:
+We would have liked to encorporate knowledge of the snake's length in a less subtle way since this seems like a key method of racking up points. Unfortunately,
+our only small attempt at it was a failure.
+We would have liked to find a way give the learner more of a push towards rewarding items (without just raising the reward).
+
+
